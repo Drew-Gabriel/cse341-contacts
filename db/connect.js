@@ -11,9 +11,10 @@ const initDb = (callback) => {
       database = client.db();
       callback(null, database);
     })
-    .catch((err) => {
-      callback(err);
-    });
+   .catch((err) => {
+  console.error("MongoDB connection error:", err);
+  callback(err);
+});
 };
 
 const getDb = () => {

@@ -17,7 +17,7 @@ app.use("/contacts", contactsRoutes);
 
 mongodb.initDb((err) => {
   if (err) {
-    console.log(err);
+    console.error("Database initialization failed:", err);
   } else {
     app.listen(port, () => {
       console.log(`Connected to MongoDB and running on port ${port}`);
