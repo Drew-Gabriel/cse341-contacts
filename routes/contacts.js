@@ -73,4 +73,61 @@ router.post("/", async (req, res) => {
   }
 });
 
+// =========================
+// PUT (UPDATE CONTACT)
+// =========================
+router.put("/:id", async (req, res) => {
+  try {
+    const userId = new ObjectId(req.params.id);
+
+    const updatedContact = {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      favoriteColor: req.body.favoriteColor,
+      birthday: req.body.birthday
+    };
+
+    const response = await mongodb
+      .getDb()
+      .db()
+      .collection("contacts")
+      .updateOne(
+        { _id: userId },
+        { $set: updatedContact }
+      );
+
+    if (response.modifiedCount > 0) {
+      res.status(200).json({ message: "Contact updated successfully" });
+    } else {
+      res.status(404).json({ message: "Contact not found or no changes made" });
+    }
+  } catch (err) {
+    res.status(400).json({ message: "Invalid ID format", error: err.message });
+  }
+});
+
+// =========================
+// DELETE (REMOVE CONTACT)
+// =========================
+router.delete("/:id", async (req, res) => {
+  try {
+    const userId = new ObjectId(req.params.id);
+
+    const response = await mongodb
+      .getDb()
+      .db()
+      .collection("contacts")
+      .deleteOne({ _id: userId });
+
+    if (response.deletedCount > 0) {
+      res.status(200).json({ message: "Contact deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Contact not found" });
+    }
+  } catch (err) {
+    res.status(400).json({ message: "Invalid ID format", error: err.message });
+  }
+});
+
 module.exports = router;
