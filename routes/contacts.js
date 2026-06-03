@@ -4,27 +4,73 @@ const router = express.Router();
 const mongodb = require("../db/connect");
 const { ObjectId } = require("mongodb");
 
+// =========================
 // GET ALL CONTACTS
+// =========================
 router.get("/", async (req, res) => {
-  const result = mongodb.getDb().collection("contacts").find();
-  result.toArray().then((lists) => {
+  try {
+    const result = mongodb.getDb().db().collection("contacts").find();
+    const lists = await result.toArray();
+
     res.setHeader("Content-Type", "application/json");
     res.status(200).json(lists);
-  });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
+// =========================
 // GET ONE CONTACT
+// =========================
 router.get("/:id", async (req, res) => {
-  const userId = new ObjectId(req.params.id);
+  try {
+    const userId = new ObjectId(req.params.id);
 
-  const result = mongodb
-    .getDb()
-    .collection("contacts")
-    .find({ _id: userId });
+    const result = await mongodb
+      .getDb()
+      .db()
+      .collection("contacts")
+      .find({ _id: userId });
 
-  result.toArray().then((lists) => {
-    res.status(200).json(lists[0]);
-  });
+    const lists = await result.toArray();
+
+    if (lists.length > 0) {
+      res.status(200).json(lists[0]);
+    } else {
+      res.status(404).json({ message: "Contact not found" });
+    }
+  } catch (err) {
+    res.status(400).json({ message: "Invalid ID format" });
+  }
+});
+
+// =========================
+// POST (CREATE CONTACT)
+// =========================
+router.post("/", async (req, res) => {
+  try {
+    const contact = {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      favoriteColor: req.body.favoriteColor,
+      birthday: req.body.birthday
+    };
+
+    const response = await mongodb
+      .getDb()
+      .db()
+      .collection("contacts")
+      .insertOne(contact);
+
+    if (response.acknowledged) {
+      res.status(201).json({ message: "Contact added successfully" });
+    } else {
+      res.status(500).json({ message: "Failed to add contact" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 module.exports = router;
