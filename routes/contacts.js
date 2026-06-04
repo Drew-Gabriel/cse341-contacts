@@ -38,6 +38,11 @@ router.get("/", async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ *       404:
+ *         description: Not found
  */
 router.get("/:id", async (req, res) => {
   const userId = new ObjectId(req.params.id);
@@ -47,11 +52,8 @@ router.get("/:id", async (req, res) => {
     .collection("contacts")
     .findOne({ _id: userId });
 
-  if (result) {
-    res.json(result);
-  } else {
-    res.status(404).json({ message: "Contact not found" });
-  }
+  if (result) res.json(result);
+  else res.status(404).json({ message: "Not found" });
 });
 
 /**
@@ -66,6 +68,9 @@ router.get("/:id", async (req, res) => {
  *         application/json:
  *           schema:
  *             type: object
+ *     responses:
+ *       201:
+ *         description: Created
  */
 router.post("/", async (req, res) => {
   const result = await mongodb
@@ -96,10 +101,20 @@ router.post("/", async (req, res) => {
  *             type: object
  *     responses:
  *       200:
- *         description: Contact updated successfully
+ *         description: Updated
  *       404:
- *         description: Contact not found
+ *         description: Not found
  */
+router.put("/:id", async (req, res) => {
+  const userId = new ObjectId(req.params.id);
+
+  const result = await mongodb
+    .getDb()
+    .collection("contacts")
+    .updateOne({ _id: userId }, { $set: req.body });
+
+  res.json(result);
+});
 
 /**
  * @swagger
@@ -115,7 +130,17 @@ router.post("/", async (req, res) => {
  *           type: string
  *     responses:
  *       200:
- *         description: Contact deleted successfully
- *       404:
- *         description: Contact not found
+ *         description: Deleted
  */
+router.delete("/:id", async (req, res) => {
+  const userId = new ObjectId(req.params.id);
+
+  const result = await mongodb
+    .getDb()
+    .collection("contacts")
+    .deleteOne({ _id: userId });
+
+  res.json(result);
+});
+
+module.exports = router;
