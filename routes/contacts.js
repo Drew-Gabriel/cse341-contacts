@@ -4,109 +4,82 @@ const router = express.Router();
 const mongodb = require("../db/connect");
 const { ObjectId } = require("mongodb");
 
-// =========================
-// GET ALL CONTACTS
-// =========================
+/**
+ * @swagger
+ * /contacts:
+ *   get:
+ *     summary: Get all contacts
+ */
 router.get("/", async (req, res) => {
-  try {
-    const result = mongodb.getDb().collection("contacts").find();
-    const lists = await result.toArray();
-
-    res.status(200).json(lists);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+  const result = mongodb.getDb().collection("contacts").find();
+  res.json(await result.toArray());
 });
 
-// =========================
-// GET ONE CONTACT
-// =========================
+/**
+ * @swagger
+ * /contacts/{id}:
+ *   get:
+ *     summary: Get contact by ID
+ */
 router.get("/:id", async (req, res) => {
-  try {
-    const userId = new ObjectId(req.params.id);
+  const userId = new ObjectId(req.params.id);
 
-    const result = await mongodb
-      .getDb()
-      .collection("contacts")
-      .findOne({ _id: userId });
+  const result = await mongodb
+    .getDb()
+    .collection("contacts")
+    .findOne({ _id: userId });
 
-    if (result) {
-      res.status(200).json(result);
-    } else {
-      res.status(404).json({ message: "Contact not found" });
-    }
-  } catch (err) {
-    res.status(400).json({ message: "Invalid ID format", error: err.message });
-  }
+  if (result) res.json(result);
+  else res.status(404).json({ message: "Not found" });
 });
 
-// =========================
-// POST (CREATE CONTACT)
-// =========================
+/**
+ * @swagger
+ * /contacts:
+ *   post:
+ *     summary: Create contact
+ */
 router.post("/", async (req, res) => {
-  try {
-    const contact = req.body;
+  const result = await mongodb
+    .getDb()
+    .collection("contacts")
+    .insertOne(req.body);
 
-    const response = await mongodb
-      .getDb()
-      .collection("contacts")
-      .insertOne(contact);
-
-    if (response.acknowledged) {
-      res.status(201).json(response);
-    } else {
-      res.status(500).json({ message: "Failed to add contact" });
-    }
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+  res.status(201).json(result);
 });
 
-// =========================
-// PUT (UPDATE CONTACT)
-// =========================
+/**
+ * @swagger
+ * /contacts/{id}:
+ *   put:
+ *     summary: Update contact
+ */
 router.put("/:id", async (req, res) => {
-  try {
-    const userId = new ObjectId(req.params.id);
+  const userId = new ObjectId(req.params.id);
 
-    const response = await mongodb
-      .getDb()
-      .collection("contacts")
-      .updateOne(
-        { _id: userId },
-        { $set: req.body }
-      );
+  const result = await mongodb
+    .getDb()
+    .collection("contacts")
+    .updateOne({ _id: userId }, { $set: req.body });
 
-    if (response.modifiedCount > 0) {
-      res.status(200).json({ message: "Contact updated successfully" });
-    } else {
-      res.status(404).json({ message: "Contact not found or no changes made" });
-    }
-  } catch (err) {
-    res.status(400).json({ message: "Invalid ID format", error: err.message });
-  }
+  res.json(result);
 });
 
-// =========================
-// DELETE CONTACT
-// =========================
+/**
+ * @swagger
+ * /contacts/{id}:
+ *   delete:
+ *     summary: Delete contact
+ */
 router.delete("/:id", async (req, res) => {
-  try {
-    const userId = new ObjectId(req.params.id);
+  const userId = new ObjectId(req.params.id);
 
-    const response = await mongodb
-      .getDb()
-      .collection("contacts")
-      .deleteOne({ _id: userId });
+  const result = await mongodb
+    .getDb()
+    .collection("contacts")
+    .deleteOne({ _id: userId });
 
-    if (response.deletedCount > 0) {
-      res.status(200).json({ message: "Contact deleted successfully" });
-    } else {
-      res.status(404).json({ message: "Contact not found" });
-    }
-  } catch (err) {
-    res.status(400).json({ message: "Invalid ID format", error: err.message });
-  }
+  res.json(result);
 });
 
 module.exports = router;
