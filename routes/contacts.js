@@ -18,7 +18,7 @@ const { ObjectId } = require("mongodb");
  */
 router.get("/", async (req, res) => {
   try {
-    const result = mongodb.getDb().db().collection("contacts").find();
+    const result = mongodb.getDb().collection("contacts").find();
     const lists = await result.toArray();
 
     res.status(200).json(lists);
