@@ -88,17 +88,18 @@ router.post("/", async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Contact updated successfully
+ *       404:
+ *         description: Contact not found
  */
-router.put("/:id", async (req, res) => {
-  const userId = new ObjectId(req.params.id);
-
-  const result = await mongodb
-    .getDb()
-    .collection("contacts")
-    .updateOne({ _id: userId }, { $set: req.body });
-
-  res.json(result);
-});
 
 /**
  * @swagger
@@ -106,16 +107,15 @@ router.put("/:id", async (req, res) => {
  *   delete:
  *     summary: Delete contact
  *     tags: [Contacts]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Contact deleted successfully
+ *       404:
+ *         description: Contact not found
  */
-router.delete("/:id", async (req, res) => {
-  const userId = new ObjectId(req.params.id);
-
-  const result = await mongodb
-    .getDb()
-    .collection("contacts")
-    .deleteOne({ _id: userId });
-
-  res.json(result);
-});
-
-module.exports = router;
