@@ -8,17 +8,13 @@ const initDb = (callback) => {
 
   mongodb.MongoClient.connect(process.env.MONGODB_URI)
     .then((client) => {
-      // IMPORTANT: choose your database name here
-      database = client.db("contacts");
-
-      console.log("Connected to MongoDB");
-
+      database = client.db();
       callback(null, database);
     })
-    .catch((err) => {
-      console.error("MongoDB connection error:", err);
-      callback(err);
-    });
+   .catch((err) => {
+  console.error("MongoDB connection error:", err);
+  callback(err);
+});
 };
 
 const getDb = () => {
@@ -28,7 +24,4 @@ const getDb = () => {
   return database;
 };
 
-module.exports = {
-  initDb,
-  getDb
-};
+module.exports = { initDb, getDb };
